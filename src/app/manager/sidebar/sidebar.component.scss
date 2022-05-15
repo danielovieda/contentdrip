@@ -1,0 +1,41 @@
+@import url(../../shared/homepage/homepage.component.css);
+
+.active {
+
+}
+
+.active:hover {
+  color: green;
+  background-color: white;
+}
+
+.campaigns {
+  cursor: pointer;
+}
+
+.inactive {
+
+}
+
+.campaignTitle {
+  font-size: 10pt;
+}
+
+div span i {
+  margin-left: 5px;
+}
+
+div span i:first-of-type {
+  margin-left: 0px;
+}
+
+
+.smalltext ul li {
+  font-size: 10pt;
+  margin: 0;
+}
+
+.campaignTitle {
+  font-weight: bold;
+  font-size: 12pt;
+}

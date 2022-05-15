@@ -1,0 +1,107 @@
+<div class="row" *ngIf="noPosts">
+  <div class="col">
+    <p>No posts were found.</p>
+    <p>If your campaign was made recently, it may take up to 30 minutes to generate posts.</p>
+  </div>
+</div>
+
+<div class="row" *ngIf="noPosts">
+  <div class="col" style="width: 200px; height: 200px">
+    <ngx-spinner name="postSpinner"
+    [fullScreen]="false">
+      <p style="color: white">Loading Posts...</p>
+    </ngx-spinner>
+  </div>
+</div>
+
+
+<!--
+<div class="row mb-2" *ngFor="let post of posts, let i = index" style="width: 100%">
+  <div class="input-group text-center w-100">
+    <span class="input-group-text text-center justify-content-center" style="width: 25%">
+      <p class="badge bg-primary rounded-pill" *ngIf="post.scheduleDate != null">{{ post.scheduleDate | slice:5:10 }}</p>&nbsp;
+      <p class="badge bg-primary rounded-pill" *ngIf="post.scheduleDate != null">{{ post.scheduleDate | slice:11:16 }}</p>
+      <span class="badge bg-primary rounded-pill" *ngIf="post.scheduleDate == null">Pending</span>
+    </span>
+
+    <span class="input-group-text mediaContainer text-center justify-content-center" (click)="toggleList(i)" style="width: 65%">
+      <img src="{{ post.mediaUrls }}" class="rounded" />
+    </span>
+
+      <button type="button" class="btn btn-danger text-light" style="width: 10%" data-bs-toggle="modal" data-bs-target="#confirmPostDelete" (click)="postToDelete = post.post_id; linkToDelete = post.link_id; ayrId = post.ayrResponse.posts[0].id; postIndex = i">
+        <i class="far fa-trash-alt" style="cursor: pointer"></i>
+      </button>
+  </div>
+
+  <div class="input-group" [style]="isListExpanded(i)?'':'display:none'">
+    <ul class="list-group w-100">
+      <li class="list-group-item d-flex justify-content-between align-items-center fw-light">{{ post.post }}</li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <i class="fab fa-twitter fa-lg" *ngIf="post.platforms?.includes('twitter')"></i>
+          <i class="fab fa-instagram fa-lg" *ngIf="post.platforms?.includes('instagram')"></i>
+          <i class="fab fa-facebook fa-lg" *ngIf="post.platforms?.includes('facebook')"></i>
+          <i class="fab fa-reddit fa-lg" *ngIf="post.platforms?.includes('reddit')"></i>
+          <i class="fab fa-telegram fa-lg" *ngIf="post.platforms?.includes('telegram')"></i>
+      </li>
+    </ul>
+  </div>
+
+
+</div>
+-->
+
+<!--
+██╗   ██╗██████╗
+██║   ██║╚════██╗
+██║   ██║ █████╔╝
+╚██╗ ██╔╝██╔═══╝
+ ╚████╔╝ ███████╗
+  ╚═══╝  ╚══════╝
+
+-->
+
+<div class="row mb-2 w-100 d-flex justify-content-evenly">
+  <div class="mediaContainer" *ngFor="let post of posts, let i = index">
+    <img src="{{ post.mediaUrls }}" class="rounded d-block" (click)="toggleList(i)"/>
+    <div class="icons bg-dark rounded" [style]="isListExpanded(i)? 'display:none' : ''">
+      <span>{{ post.scheduleDate | slice:5:10 }} @ {{ post.scheduleDate | slice:11:16 }}</span>
+      <i class="fab fa-facebook fa-lg" *ngIf="post.platforms === 'facebook'"></i>
+      <i class="fab fa-reddit fa-lg" *ngIf="post.platforms === 'reddit'"></i>
+      <i class="fab fa-twitter fa-lg" *ngIf="post.platforms === 'twitter'"></i>
+      <i class="fab fa-instagram fa-lg" *ngIf="post.platforms === 'instagram'"></i>
+      <i class="fab fa-telegram fa-lg" *ngIf="post.platforms === 'telegram'"></i>
+      <i class="fas fa-link fa-lg" *ngIf="post.link_id"></i>
+    </div>
+    <div class="postText bg-dark rounded overflow-auto scrollbar" id="style-2" [style]="isListExpanded(i)? '' : 'display:none'" (click)="toggleList(i)">
+      <p [innerHTML]="post.post | linky:{stripPrefix: false, className: 'postLink'}"></p>
+    </div>
+    <div class="postClose bg-dark rounded text-center" [style]="isListExpanded(i)? 'display:none' : ''">
+      <i class="fas fa-times fa-lg deletePost" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#confirmPostDelete" (click)="postToDelete = post.post_id; linkToDelete = post.link_id; ayrId = post.ayrResponse.posts[0].id; postIndex = i"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+<!-- Confirm delete Modal -->
+<div class="modal fade" id="confirmPostDelete" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Are you sure?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        This will delete your post from your campaign. If already posted, we will attempt to delete it from your social network.
+        <strong>This cannot be undone.</strong>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btnPrimary" data-bs-dismiss="modal" (click)="postToDelete = ''">Close</button>
+        <button type="button" class="btn btnSecondary" (click)="confirm = true; confirmDelete(postIndex)" data-bs-dismiss="modal">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,49 @@
+<footer>
+  <div class="footerCol" [ngClass]="pages.includes(currentRoute) ? 'fixFooter' : 'mt-5'">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-5 col-xl-6">
+          <div class="footerAboutCol">
+            <div class="footerLogo">
+              <a routerLink="/"><img src="assets/images/logo.png" alt="..."></a>
+            </div>
+            <p>The fastest, easiest way to publish your content so you can focus on creating.</p>
+            <p *ngIf="currentRoute === '/home'">* Features coming soon.</p>
+          </div>
+        </div>
+        <div class="col-lg-7 col-xl-6">
+          <div class="row g-3">
+            <div class="col">
+              <h4>More Info</h4>
+              <ul class="footerLinks">
+                <li><a routerLink="/twitter-marketing">Twitter Marketing</a></li>
+
+
+              </ul>
+            </div>
+            <div class="col">
+              <h4>Company</h4>
+              <ul class="footerLinks">
+                <li><a routerLink="howitworks">How it Works</a></li>
+                <li><a routerLink="/terms">Terms of Service</a></li>
+                <li><a routerLink="/terms" fragment="privacy">Privacy Policy</a></li>
+                <li><a routerLink="/terms" fragment="refunds">Refund Policy</a></li>
+              </ul>
+            </div>
+            <div class="col-12 col-sm-auto">
+              <h4>Contact</h4>
+              <ul class="footerContactCol">
+                <li><span class="fcIcon"><i class="far fa-envelope fa-lg"></i></span> <span class="fcText">support@contentdrip.io</span></li>
+                <!-- <li><span class="fcIcon"><i class="fas fa-code fa-lg"></i></span> <span class="fcText">support@contentdrip.io</span></li> -->
+                <!-- <li><span class="fcIcon"><img src="assets/images/phone-icon.svg" alt="..."></span> <span class="fcText">(603) 555-0123</span></li> -->
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="copyrightCol">
+        <p>Copyrights © 2021 contentdrip.io </p>
+      </div>
+    </div>
+  </div>
+</footer>

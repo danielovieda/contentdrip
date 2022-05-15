@@ -1,0 +1,395 @@
+
+<div class="container-sm">
+  <div class="row">
+    <div class="col-sm">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link" (click)="profile = true; socials = false; plan = false" [ngClass]="profile ? 'activePrimary' : ''">Profile & Settings</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" (click)="socials = true; profile = false; plan = false" [ngClass]="socials ? 'activePrimary' : ''">Socials</a>
+      </li>
+      <!-- <li class="nav-item">
+        <a class="nav-link" (click)="socials = false; profile = false; plan = true" [ngClass]="plan ? 'active' : ''">Subscription Plan</a>
+      </li> -->
+
+    </ul>
+    </div>
+  </div>
+  </div>
+
+
+    <div class="container-sm" [hidden]="!profile">
+
+    <!-- Profile and Settings -->
+    <div class="row">
+      <div class="col mb-2 position-relative">
+        <img [src]="profileIcon" class="avatar" *ngIf="profileIcon" />
+        <img [src]="'assets/' + randomAvatar()" class="avatar default-avatar" *ngIf="!profileIcon" />
+        <img [src]="profileHeader" class="profile-header rounded" *ngIf="profileHeader" />
+        <img src="assets/default_header.png" class="profile-header rounded" *ngIf="!profileHeader" />
+        <div class="row username">
+          <div class="col">
+            <span class="bg-dark text-light rounded p-1 text-bold fw-bold">@{{ accountUsername }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      <form [formGroup]="profileForm" (ngSubmit)="updateAccount()">
+      <div class="row">
+      <div class="col-sm">
+
+        <div class="input-group mb-3">
+          <span class="input-group-text w-25"><strong>Username</strong></span>
+          <input type="text" class="form-control" name="username_input" [value]="accountUsername" formControlName="username">
+        </div>
+
+        <div class="input-group mb-3">
+          <span class="input-group-text w-25"><strong>Email</strong></span>
+          <input type="text" class="form-control" [value]="email"
+          formControlName="email"
+          [class.is-invalid]="profileForm.get('email').invalid && profileForm.get('email').dirty"
+          [class.is-valid]="profileForm.get('email').valid">
+        </div>
+
+        <div class="mb-3">
+          <div class="input-group mb-3">
+            <span class="input-group-text"><strong>Profile Icon</strong></span>
+            <input class="form-control" type="file" name="" id="profileIcon" formControlName="profileIcon"
+            (change)="selectIcon($event)"
+            accept=".png, .jpg, .jpeg">
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="input-group mb-3">
+            <span class="input-group-text"><strong>Profile Header</strong></span>
+            <input class="form-control" type="file" name="" id="profileHeader" formControlName="profileHeader"
+            (change)="selectHeader($event)"
+            accept=".png, .jpg, .jpeg">
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="input-group mb-3">
+            <span class="input-group-text w-25"><strong>Subscription Plan</strong></span>
+            <div class="btn-group" role="group w-75" aria-label="Basic example">
+              <button type="button" class="btn" [class]="checkPlan('0') ? 'btnPrimary' : 'btnPrimaryOutline'">Free</button>
+              <button type="button" class="btn" [class]="checkPlan('1') ? 'btnPrimary' : 'btnPrimaryOutline'" (click)="changePlan('Basic')">Basic</button>
+              <button type="button" class="btn" [class]="checkPlan('2') ? 'btnPrimary' : 'btnPrimaryOutline'" (click)="changePlan('Influencer')">Influencer</button>
+              <button type="button" class="btn" [class]="checkPlan('3') ? 'btnPrimary' : 'btnPrimaryOutline'" (click)="changePlan('Mega Influencer')">Mega</button>
+            </div>
+          </div>
+        </div>
+
+
+        </div>
+
+        <div class="row text-center">
+        <div class="col">
+        <button class="btn btnPrimary mx-auto m-0" type="submit"><h5 class="m-1">Update Account</h5></button>
+        </div>
+        <div class="col">
+          <button class="btn btnPrimaryOutline mx-auto m-0" type="submit" (click)="socials = true; profile = false; plan = false"><h5 class="m-1">Connect Socials</h5></button>
+          </div>
+        <div class="col">
+        <button class="btn btnSecondary" type="button" data-bs-toggle="modal" data-bs-target="#confirmAccountDelete"><h5 class="m-1">Delete Account</h5></button>
+        </div>
+
+
+
+
+
+        </div>
+
+      </div>
+    </form>
+    </div>
+
+
+
+    <div class="container-sm" *ngIf="socials">
+      <div class="row" *ngIf="userSettings.ayrshare_profiles.length >= 1">
+        <div class="col-4"><h6>Profile Name</h6></div>
+        <div class="col-4 text-center"><h6>Active Accounts</h6></div>
+        <div class="col-2"></div>
+        <div class="col-2"></div>
+      </div>
+      <div class="row mb-2" *ngFor="let profiles of userSettings.ayrshare_profiles; let i = index">
+        <div class="col-4"><span class="align-middle">{{ profiles.profile_name }}</span></div>
+        <div class="col-4 text-center"><span *ngIf="activeProfiles[i] != ''"><span *ngFor="let icon of activeProfiles[i].toString().split(',')"><i class="fab fa-{{ icon }} fa-lg"></i></span></span></div>
+        <div class="col-2 text-center"><button class="btn btnPrimary" (click)="goToLink(profiles.profileKey)"><i class="fas fa-cog fa-lg"></i></button></div>
+        <div class="col-2 text-center"><button class="btn btnSecondary" type="button" data-bs-toggle="modal" data-bs-target="#confirmProfileDelete" (click)="profileToDelete = profiles.title"><i class="fas fa-trash-alt fa-lg"></i></button></div>
+      </div>
+      <div class="row" *ngIf="userSettings.ayrshare_profiles.length <= 0">
+        <div class="col">
+          <div role="alert" class="alert alert-info fade show m-3">
+            <strong>Instructions: </strong> Please add a profile in order to connect your socials to it.
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 w-100 d-flex justify-content-center">
+          <div class="input-group m-3 w-75">
+            <input type="text" class="form-control" placeholder="Profile Title" aria-label="Profile Title" aria-describedby="Profile Title" [(ngModel)]="profileTitle" name="profileTitle">
+            <button class="btn btnPrimary" type="button" id="button-addon2"
+            (click)="createProfile(profileTitle, userSettings.ayrshare_profiles.length)"
+            [disabled]="userSettings.ayrshare_profiles.length >= userSettings.maxProfiles">Add Profile</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- <div class="container-sm text-center" *ngIf="plan">
+      <div class="row mt-2 mb-2 text-center">
+        <div class="col">Free</div>
+        <div class="col">
+          <button class="btn btnPrimary" *ngIf="!checkPlan('free')" (click)="changePlan('free')">Change Plan</button>
+          <button class="btn btn-success" *ngIf="checkPlan('free')">Current Plan</button>
+        </div>
+      </div>
+
+      <div class="row mt-2 mb-2 text-center">
+        <div class="col">Pro (${{pricing[0].amount}}/month)</div>
+        <div class="col">
+          <button class="btn btnPrimary" *ngIf="!checkPlan('pro')" (click)="changePlan('pro')">Change Plan</button>
+          <button class="btn btn-success" *ngIf="checkPlan('pro')">Current Plan</button>
+        </div>
+      </div>
+
+      <div class="row mt-2 mb-2 text-center">
+        <div class="col">Influencer (${{pricing[1].amount}}/month)</div>
+        <div class="col">
+          <button class="btn btnPrimary" *ngIf="!checkPlan('influencer')" (click)="changePlan('influencer')">Change Plan</button>
+          <button class="btn btn-success" *ngIf="checkPlan('influencer')">Current Plan</button>
+        </div>
+      </div>
+
+      <div class="row mt-2 mb-2 text-center">
+        <div class="col">Enterprise ({{pricing[2].amount}})</div>
+        <div class="col">
+          <button class="btn btnPrimary" *ngIf="!checkPlan('enterprise')" (click)="changePlan('enterprise')">Change Plan</button>
+          <button class="btn btn-success" *ngIf="checkPlan('enterprise')">Current Plan</button>
+        </div>
+      </div>
+
+    </div> -->
+
+
+    <div class="container-sm text-center" *ngIf="upgrade && plan">
+      <div class="row mt-2 mb-2 text-center">
+        <div class="col"><h5>Change your plan to: {{ whichPlan.charAt(0).toUpperCase() + whichPlan.substring(1) }}</h5></div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <span *ngIf="whichPlan == 'free'">Are you sure you want to change your plan to the free plan?
+            You will miss out on many features.
+          </span>
+
+          <span *ngIf="whichPlan == 'enterprise'">If you're an organization or a social media expert managing multiple accounts,
+            we are happy to provide you with custom pricing to meet your needs. Please send us a message using the form below.
+          </span>
+        </div>
+      </div>
+
+    </div>
+
+
+
+
+    <!-- Confirm delete account Modal -->
+<div class="modal fade" id="confirmAccountDelete" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Permanently Delete Account</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete your account? This will stop any active campaigns and delete all posts.
+        <strong>This cannot be undone.</strong> Please don't forget to visit the linked accounts in your social media profiles to disconnect our platform.
+        You may also do this from the settings of your social networks.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btnPrimary" data-bs-dismiss="modal" (click)="confirmDelete == false">Close</button>
+        <button type="button" class="btn btnSecondary" (click)="confirmDelete = true; confirmDeleteMyAccount()" data-bs-dismiss="modal">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <!-- Confirm delete profile Modal -->
+    <div class="modal fade" id="confirmProfileDelete" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="staticBackdropLabel">Delete Social Profile</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to delete this profile? Any social networks connected to this profile will need to be added again if you wish to use them.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btnPrimary" data-bs-dismiss="modal" (click)="confirmProfileDelete = false; profileToDelete = ''">Close</button>
+            <button type="button" class="btn btnSecondary" (click)="confirmProfileDelete = true; confirmDeleteMyProfile()" data-bs-dismiss="modal">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+<button type="button" class="btn btnPrimary" data-bs-toggle="modal" data-bs-target="#welcomeModal2" id="welcomeModal" #welcomeModal hidden>
+  Launch demo modal
+</button>
+
+<div class="modal fade" id="welcomeModal2" tabindex="-1" aria-labelledby="welcomeModal" aria-hidden="true" data-bs-keyboard="false" #welcomeModal2>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="">Welcome to Content Drip</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <img src="assets/drippy_welcome.png" class="img-fluid drippy_welcome" /><p>Welcome and thank you for trying our service.
+          You've just made the first step into saving a TON of time in scheduling media posts. The <strong>first step</strong> is to connect
+          your social account(s).
+        </p>
+        <p>Once you've connected your socials, you can start uploading media and creating your campaign.
+          Your campaign will automatically schedule all of your posts within seconds. Congratulations!
+          Use all that saved time to engage with your followers and fans.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btnPrimary" (click)="socials = true; profile = false; plan = false" data-bs-dismiss="modal">Connect Socials</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Upgrade Modal -->
+
+<button type="button" class="btn btnPrimary" data-bs-toggle="modal" data-bs-target="#upgradeModal" id="upgradeButton" #upgradeButton hidden>
+</button>
+
+<div class="modal fade" id="upgradeModal" tabindex="-1" aria-labelledby="upgradeModal" aria-hidden="true" data-bs-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="">Upgrade Plan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body justify-content-center d-flex">
+
+
+        <!-- Basic Plan -->
+        <div class="card mb-4 rounded-3 shadow-sm w-75" *ngIf="whichPlan === 'Basic'">
+          <div class="card-header py-3 text-center">
+            <h4 class="my-0 fw-normal">{{ whichPlan }}</h4>
+          </div>
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">{{ upgradePrice }}<small class="text-muted fw-light">/mo</small></h1>
+            <ul class="list-unstyled mt-3 mb-4">
+              <li>5 Posts/day per platform</li>
+              <li>1 Profiles (5 social networks)</li>
+              <li>2 Social networks per campaign</li>
+              <li>5 Active campaigns</li>
+              <li>5 Primary links per Campaign</li>
+              <li>Custom text watermark</li>
+              <li><strong>50</strong> images per campaign</li>
+              <li><strong>60</strong> #hashtags per campaign</li>
+              <li><strong>30</strong> descriptions per campaign</li>
+              <li><strong>2</strong> reposts per post</li>
+              <li>AI description morph (Level 2)</li>
+              <li>Tag 2 instagram users per post</li>
+              <li>30 instagram users per campaign</li>
+              <li>5 subreddits per campaign</li>
+              <li><strong>Total capacity: 1,500 posts</strong></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Influencer Plan -->
+        <div class="card mb-4 rounded-3 shadow-sm w-75" *ngIf="whichPlan === 'Influencer'">
+          <div class="card-header py-3 text-center">
+            <h4 class="my-0 fw-normal">{{ whichPlan }}</h4>
+          </div>
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">{{ upgradePrice }}<small class="text-muted fw-light">/mo</small></h1>
+            <ul class="list-unstyled mt-3 mb-4">
+              <li>15 Posts/day per platform</li>
+              <li>3 Profiles (15 social networks)</li>
+              <li>3 Social networks per campaign</li>
+              <li>10 Active campaigns</li>
+              <li><strong>Smart Scheduling</strong></li>
+              <li>10 Primary links per Campaign</li>
+              <li>Link Analytics</li>
+              <li>Custom text watermark</li>
+              <li><strong>75</strong> images per campaign</li>
+              <li><strong>120</strong> #hashtags per campaign</li>
+              <li><strong>50</strong> descriptions per campaign</li>
+              <li><strong>5</strong> reposts per post</li>
+              <li>AI description morph (Level 3 - Max)</li>
+
+              <li>Tag 6 instagram users per post</li>
+              <li>75 instagram users per campaign</li>
+              <li>15 subreddits per campaign</li>
+              <li><strong>Total capacity: 33,750 posts</strong></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Mega Influencer Plan -->
+        <div class="card mb-4 rounded-3 shadow-sm w-75" *ngIf="whichPlan === 'Mega Influencer'">
+          <div class="card-header py-3 text-center">
+            <h4 class="my-0 fw-normal">{{ whichPlan }}</h4>
+          </div>
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">{{ upgradePrice }}<small class="text-muted fw-light">/mo</small></h1>
+            <ul class="list-unstyled mt-3 mb-4">
+              <li><strong>Maximum posts allowed per day, per platform</strong></li>
+              <li>5 Profiles (25 social networks)</li>
+              <li>5 Social networks per campaign</li>
+              <li><strong>Unlimited*</strong> campaigns</li>
+              <li><strong>Smart Scheduling</strong></li>
+              <li>Unlimited* links per Campaign</li>
+              <li>Link Analytics</li>
+              <li>Custom text watermark</li>
+              <li><strong>100</strong> images per campaign</li>
+              <li><strong>Unlimited*</strong> #hashtags per campaign</li>
+              <li><strong>75</strong> descriptions per campaign</li>
+              <li><strong>10</strong> reposts per post</li>
+              <li>AI description morph (Level 3 - Max)</li>
+
+              <li>Tag 20 instagram users per post</li>
+              <li>150 instagram users per campaign</li>
+              <li>30 subreddits per campaign</li>
+              <li><strong>Total capacity: Unlimited*</strong></li>
+              <li><small>* virtually unlimited.</small></li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer justify-content-center d-flex">
+        <button type="button" class="btn btn-lg btn-success" (click)="openLink(upgradeLink)" data-bs-dismiss="modal" [disabled]="!validEmail()"><strong>Upgrade for {{ upgradePrice }}</strong></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ngx-spinner template="<img src='assets/drippy_welcome.png' />" name="upgrade">
+<p style="font-size: 20px; color: white; background-color: black; opacity: 0.85" class="rounded">Redirecting you...</p>
+<p style="font-size: 20px; color: white; background-color: black; opacity: 0.85" class="rounded">Please ensure the e-mail you use at checkout matches your contentdrip.io settings e-mail.</p>
+</ngx-spinner>
+
+<ngx-spinner name="loading">
+  <p style="font-size: 20px; color: white;">
+    Loading settings...</p>
+</ngx-spinner>
+
+

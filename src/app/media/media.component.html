@@ -1,0 +1,56 @@
+<ngx-spinner>
+  <p style="font-size: 20px; color: white">Uploading media...</p>
+</ngx-spinner>
+<div class="container-md">
+  <div class="row justify-content-center mb-2 d-flex">
+    <div class="col-md-12 text-center d-flex justify-content-center">
+      <div class="shadow-sm p-2 w-75 text-center" *ngIf="!uploadSuccess">
+        <p>Upload your media here and you'll be able to select files to use
+          when you are creating a campaign.
+        </p>
+      </div>
+
+      <div class="alert alert-success" role="alert" *ngIf="uploadSuccess">
+        Your media has been uploaded. Time to <a routerLink="/campaigns">create a campaign</a>!
+      </div>
+
+    </div>
+  </div>
+  <form (ngSubmit)="upload()">
+  <div class="row mb-2">
+    <div class="col-md">
+
+        <ngx-dropzone (change)="onSelect($event)" [expandable]="true" [showPreviews]="true">
+          <ngx-dropzone-label>Add your images here.</ngx-dropzone-label>
+          <ngx-dropzone-image-preview *ngFor="let f of files" [removable]="true" (removed)="onRemove(f)" [file]="f">
+          </ngx-dropzone-image-preview>
+        </ngx-dropzone>
+
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12 text-center mb-2">
+      <button type="submit" class="btn btnPrimary">Upload <span *ngIf="files.length >= 1">{{ files.length }} Files</span></button>
+    </div>
+  </div>
+  </form>
+
+
+    <div class="row d-flex justify-content-center">
+      <div class="col-md">
+        <div class="mediaContainer mx-auto d-flex justify-content-center" *ngFor="let media of mediaObj, let i = index">
+          <img [src]="media.thumbnail" class="rounded d-block" />
+          <div class="close bg-dark rounded text-center" (click)="deleteMedia(media.path, i)">
+            <i class="fas fa-times fa-lg"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+
+
+
+</div>

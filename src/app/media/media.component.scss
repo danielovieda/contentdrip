@@ -1,0 +1,33 @@
+@import url('../shared/homepage/homepage.component.css');
+
+.mediaContainer {
+  position: relative;
+  float: left;
+  display: block;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.mediaContainer img {
+  max-width: 220px;
+  max-height: 220px;
+  width: 242px;
+  height: 242px;
+  object-fit: cover;
+  padding: 2px;
+  text-align: center;
+}
+
+.mediaContainer .close {
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  right: 5px;
+  //bottom: 5px;
+  top: 5px;
+  color: #4d4d4d;
+  padding: 5px;
+  vertical-align: middle;
+  opacity: 0.85;
+  //align-self: flex-end;
+}

@@ -1,0 +1,70 @@
+<div class="row mb-2" *ngIf="sideBarCampaign.length === 0">
+  You have no campaigns.
+</div>
+
+<div class="row mb-2" *ngFor="let camps of sideBarCampaign, let i = index, trackBy: trackByFn">
+  <div class="input-group text-center">
+  <!-- {{camps.title}} - <span *ngFor="let networks of camps.platforms">{{ networks }}</span>
+  <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="campaignToDelete = camps.campaign_id; campIndex = i">Delete</button> -->
+
+    <span class="input-group-text text-center">
+      <span class="badge bg-primary rounded-pill">{{ camps.status | titlecase }}</span>
+    </span>
+    <input type="text" class="form-control campaignTitle" value="{{ camps.title }}" readonly style="cursor: pointer" (click)='showPost(camps.campaign_id); toggleList(i)'>
+
+
+    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="campaignToDelete = camps.campaign_id; campIndex = i">
+      <i class="fas fa-trash-alt fa-sm"></i></button>
+  </div>
+  <div class="input-group smalltext" [style]="isListExpanded(i)?'':'display:none'">
+    <ul class="list-group w-100">
+      <li class="list-group-item d-flex justify-content-between align-items-center fw-light" *ngIf="camps.description">{{ camps.description }}</li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <i class="fab fa-twitter fa-lg" *ngIf="camps.platforms?.includes('twitter')"></i>
+          <i class="fab fa-instagram fa-lg" *ngIf="camps.platforms?.includes('instagram')"></i>
+          <i class="fab fa-facebook fa-lg" *ngIf="camps.platforms?.includes('facebook')"></i>
+          <i class="fab fa-reddit fa-lg" *ngIf="camps.platforms?.includes('reddit')"></i>
+      </li>
+      <li class="list-group-item">Start date/time: {{ camps.startDate }}</li>
+      <li class="list-group-item">End date/time: {{ camps.endDate }}</li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span class="badge rounded-pill" *ngFor="let days of ['6','0','1','2','3','4', '5']" [class]="camps.scheduleDays.includes(days) ? 'bg-primary' : 'bg-secondary'">{{ getWeekdayNum(days) }}</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">Descriptions <span class="badge bg-primary rounded-pill">{{ camps.postText.length }}</span>
+        <span class="badge bg-primary rounded-pill">MORPH LEVEL: {{ camps.morphLevel }}</span></li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">Links <span class="badge bg-primary rounded-pill">{{ camps.links.length }}</span></li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">Hashtags<span class="badge bg-primary rounded-pill">{{ camps.hashTagPool.length }}</span></li>
+      <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center">
+        <span class="badge rounded-pill m-1" [class]="camps.smartSchedule ? 'bg-primary' : 'bg-secondary'">SMART SCHEDULE: {{ camps.smartSchedule ? 'ON' : 'OFF' }}</span>
+        <span class="badge rounded-pill m-1" [class]="camps.autoHashTag ? 'bg-primary' : 'bg-secondary'">AUTO HASHTAG: {{ camps.autoHashTag ? 'ON' : 'OFF' }}</span>
+        <span class="badge rounded-pill m-1" [class]="camps.autoRepost ? 'bg-primary' : 'bg-secondary'">AUTO REPOST: {{ camps.autoRepost ? 'ON' : 'OFF' }}</span>
+      </li>
+      <!-- <li class="list-group-item d-flex justify-content-between align-items-center">Posts<span class="badge bg-primary rounded-pill">{{ camps.posts.length >= 0 ? camps.posts.length : '0'}}</span>
+      <button type="button" class="btn btn-danger btn-sm"><i class="fas fa-redo-alt fa-sm"></i></button>
+      </li> -->
+
+      <!-- <li><button type="button" (click)="makePosts(camps.campaign_id)">Generate</button></li> -->
+    </ul>
+    </div>
+</div>
+
+
+<!-- Confirm delete Modal -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Are you sure?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Deleting your campaign will remove all scheduled and pending posts.
+        <strong>This cannot be undone.</strong>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btnPrimary" data-bs-dismiss="modal" (click)="campaignToDelete = ''">Close</button>
+        <button type="button" class="btn btnSecondary" (click)="confirm = true; confirmDelete(); removeItem(campIndex); showPost('clear')" data-bs-dismiss="modal">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

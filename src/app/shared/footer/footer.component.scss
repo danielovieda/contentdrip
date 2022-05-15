@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css?family=Rubik&display=swap');
+
+body {
+    background: linear-gradient(0deg, #fff, 50%, #DEEEFE);
+    font-family: 'Rubik', sans-serif;
+    background: #455A64;
+    height: 100 !important
+}
+
+.container-fluid {
+    overflow: hidden;
+    margin-top: 250px;
+    background: #dedede;
+    color: #627482 !important;
+    margin-bottom: 0;
+    padding-bottom: 0
+}
+
+.row div h5 {
+  color:white;
+  text-align: center;
+}
+
+.row div ul li {
+  list-style-type: none;
+  cursor: pointer;
+}
+
+.fixFooter {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+}

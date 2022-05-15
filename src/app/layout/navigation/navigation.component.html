@@ -1,0 +1,107 @@
+<!-- <nav class="navbar navbar-expand-sm sticky-top navbar-dark bg-dark mb-3" id="#navbarNav">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#"><img src="assets/logo.png" class="d-inline-block logo">contentdrip.io</a>
+    <button class="navbar-toggler" type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#navbarNav"
+    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" data-target=".navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav text-center">
+        <li class="nav-item">
+          <a class="nav-link" aria-current="page" href="#">Home</a>
+        </li>
+        <li class="nav-item" *ngIf="!auth.isAuthenticated$">
+          <a class="nav-link" routerLink="/pricing">Pricing</a>
+        </li>
+        <li class="nav-item" *ngIf="!auth.isAuthenticated$">
+          <a class="nav-link" routerLink="/login" (click)="auth.loginWithRedirect()">Login</a>
+        </li>
+        <li class="nav-item" *ngIf="auth.isAuthenticated$">
+          <a class="nav-link" routerLink="/campaigns">
+            Campaigns</a>
+        </li>
+        <li class="nav-item" *ngIf="auth.isAuthenticated$">
+          <a class="nav-link" routerLink="/media">
+            Media</a>
+        </li>
+        <li class="nav-item" *ngIf="auth.isAuthenticated$">
+          <a class="nav-link" routerLink="/settings">Settings</a>
+        </li>
+        <li class="nav-item" *ngIf="auth.isAuthenticated$">
+          <a class="nav-link">Logout</a>
+        </li>
+        <li>{{ userDetail }}</li>
+
+      </ul>
+    </div>
+
+  </div>
+</nav> -->
+<div class="text-center alertStyle alert alertPrimary alert-dismissible fade show mb-0" role="alert" *ngIf="navAlert">
+  <div class="container">
+    <span class="alertIcon"><img src="assets/images/anmt-icon.svg" alt="..."></span>
+    {{ navAlertMessage }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" (click)="navAlert = false"></button>
+  </div>
+</div>
+
+<header>
+  <div class="headerCol">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col">
+          <div class="logoCol">
+            <a href="index.html"><img src="assets/images/logo.png" alt="..."></a>
+          </div>
+        </div>
+        <div class="col-auto">
+          <div class="row g-2 g-sm-3 g-lg-0 align-items-center" [ngClass]="nav ? 'openNav' : ''">
+            <div class="col-auto">
+              <div class="openNav navCol">
+                <ng-container *ngIf="auth.isAuthenticated$ | async; else loggedOutNav">
+                  <ul>
+                    <li><a routerLink="/campaigns" (click)="nav = false">Campaigns</a></li>
+                    <li><a routerLink="/media" (click)="nav = false">Media</a></li>
+                    <li><a routerLink="/settings" (click)="nav = false">Settings</a></li>
+                  </ul>
+                </ng-container>
+                <ng-template #loggedOutNav>
+                  <ul>
+                    <li><a routerLink="/home" (click)="nav = false">Home</a></li>
+                    <li *ngIf="nav"><a routerLink="/howitworks" (click)="nav = false">How it Works</a></li>
+                    <li><a routerLink="/pricing" (click)="nav = false">Pricing</a></li>
+                    <li><a routerLink="/terms" (click)="nav = false">Terms</a></li>
+
+                  </ul>
+                </ng-template>
+
+              </div>
+            </div>
+            <div class="col-auto">
+              <ng-container *ngIf="userService.auth.isAuthenticated$ | async; else loggedOut">
+                <a (click)="userService.auth.logout({ returnTo: document.location.origin })" class="btn btnSecondary minWdBtn ms-lg-4">
+                  Log out
+                </a>
+              </ng-container>
+
+              <ng-template #loggedOut>
+                <a (click)="userService.loginWithRedirect()" class="btn btnSecondary minWdBtn ms-lg-4">Log in</a>
+              </ng-template>
+
+            </div>
+            <div class="col-auto d-lg-none">
+              <div class="toggle" (click)="toggleNav()">
+                <div class="bar barOne"></div>
+                <div class="bar barTwo"></div>
+                <div class="bar barThree"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+

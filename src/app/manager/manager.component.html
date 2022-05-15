@@ -1,0 +1,708 @@
+<div class="container-md campaignHeight mb-5">
+  <ngx-spinner><p style="font-size: 20px; color: white">Loading...</p></ngx-spinner>
+
+  <div class="row">
+    <div class="col m-3 d-flex justify-content-center">
+      <button class="btn btnPrimary" *ngIf="addNew" (click)="goBack()">Return to Manager</button>
+      &nbsp;<button class="btn btnPrimary" (click)="addNewCampaign()" *ngIf="!addNew">New Campaign</button>
+    </div>
+  </div>
+
+  <!-- If not adding a new campaign, manage current campaigns with the app-sidebar and app-main component -->
+  <div class="row" *ngIf="!addNew">
+    <div class="col-md-5">
+      <ngx-spinner name="campaignLoading" fullscreen="false">
+        <p style="font-size: 20px; color: white">Loading Campaigns...</p>
+      </ngx-spinner>
+      <app-sidebar [sideBarCampaign]="campaignList"></app-sidebar> <!-- sidebar is loading all campaigns from user -->
+    </div>
+    <div class="col-md-7 justify-content-center">
+      <app-main></app-main>
+    </div>
+  </div>
+  <!-- /sidebe management -->
+
+  <!-- Tab Navigation -->
+  <div class="row mb-2" *ngIf="addNew">
+    <div class="col mb-1">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link" [ngClass]="showCampaignTab ? 'active' : ''" (click)="hideAllBut('campaign')">New Campaign</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [ngClass]="showPostsTab ? 'active' : ''" (click)="hideAllBut('posts')">Posts</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [ngClass]="showMediaTab ? 'active' : ''" (click)="hideAllBut('media'); getMedia()">Media</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [ngClass]="showOptionsTab ? 'active' : ''" (click)="hideAllBut('options')">Options</a>
+      </li>
+    </ul>
+    </div>
+  </div>
+  <!-- /Tab Navigation -->
+
+  <!-- Campaign Tab -->
+  <div class="row" *ngIf="addNew">
+    <div class="col m-2">
+      <form #addCampaign="ngForm">
+        <div *ngIf="showCampaignTab">
+        <div class="input-group mb-3">
+          <span class="input-group-text w-25"><strong>Title</strong></span>
+          <input type="text" class="form-control campaignTitle" id="campaignTitle" name="campaignTitle" #title [ngModel]="newCampaign.title" (keyup)="setCampaignTitle($event)" placeholder="Campaign Title">
+        </div>
+
+        <div class="input-group mb-3">
+          <span class="input-group-text w-25">Description</span>
+          <input type="text" class="form-control" id="campaignDescription" name="campaignDescription" #cDescription [ngModel]="newCampaign.description" (keyup)="setCampaignDescription($event)" placeholder="Campaign Description (optional)">
+        </div>
+
+        <!-- Campaign Start Dates -->
+        <div class="input-group mb-3">
+          <span class="input-group-text w-25">Start Date</span>
+          <ngx-datepicker [options]="optionsStart" [ngModel]="startDatePicker" name="startDatePicker" (ngModelChange)="startDatePicker = $event; updateEndDate()" class="form-control w-25"></ngx-datepicker>
+
+          <!-- Posts per Day -->
+          <span class="input-group-text w-25"><i class="fas fa-info-circle" data-bs-toggle="modal" data-bs-target="#InfoModal" (click)="modalInfo('postsPerDay')"></i>&nbsp;Posts /day</span>
+          <select class="form-select w-auto" aria-label="Posts per Day" [(ngModel)]="newCampaign.postsPerDay" name="postPerDay">
+            <option [value]="i+1" *ngFor="let options of counter(userSettings.maxPostsPerDay); let i = index" [selected]="userSettings.maxPostsPerDay === i">{{ i+1 }}</option>
+          </select>
+        </div>
+
+        <div role="alert" class="alert alert-danger fade show m-3 alert-dismissible" *ngIf="startDatePicker > endDatePicker"> <!-- TODO -->
+          Start date cannot be after the end date.
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" (click)="scheduleError = false"></button>
+        </div>
+
+        <div class="input-group mb-3" *ngIf="userSettings.ayrshare_profiles.length >= 1">
+          <span class="input-group-text w-25">Select Profile</span>
+          <select class="form-select w-auto" [(ngModel)]="currentProfile" name="currentProfile" (ngModelChange)="refreshPlatforms($event)" #profileDropdown>
+            <option [value]="profiles.profileKey" *ngFor="let profiles of userSettings.ayrshare_profiles; let i = index; trackBy:trackByFn">{{ profiles.profile_name }}</option>
+          </select>
+        </div>
+
+        <div role="alert" class="alert alert-danger fade show m-3 alert-dismissible" *ngIf="userSettings.ayrshare_profiles.length <= 0">
+          Please go to your <a routerLink="/settings">settings</a> and add a profile to connect social networks.
+        </div>
+
+
+        <!-- activeSocialAccounts from User Settings -->
+        <!-- [disabled]="(!networkCheckbox.checked && newCampaign.platforms.length >= userSettings.maxSocialNetworks)" -->
+        <div class="input-group mb-3" *ngIf="userSettings.ayrshare_profiles.length >= 1">
+          <span class="input-group-text w-25 text-wrap"><i class="fas fa-info-circle" data-bs-toggle="modal" data-bs-target="#InfoModal" (click)="modalInfo('socialNetworks')"></i>&nbsp;Accounts</span>
+          <div class="d-flex form-control justify-content-center" *ngIf="activeSocialAccounts.length >= 1">
+            <div class="col-sm d-flex justify-content-center" *ngFor="let networks of activeSocialAccounts; let i = index" (click)="checkForMaxPlatforms()">
+              <input class="btn-check {{networks}}" type="checkbox" [id]="networks" (change)="setSocialNetworks(networks, $event)" [checked]="newCampaign.platforms.includes(networks)" #networkCheckbox
+              [disabled]="(!networkCheckbox.checked && newCampaign.platforms.length >= userSettings.maxSocialNetworks)"
+              >
+              <label class="btn {{networks}}" [for]="networks"><i class="fab fa-{{ networks }} fa-3x" matTooltip="some info" [matTooltipPosition]="'left'"></i></label>
+              <!-- <label class="platformLabel" [for]="networks">{{ getPlatformName(networks) }}</label> -->
+            </div>
+          </div>
+          <div class="d-flex form-control justify-content-center" *ngIf="activeSocialAccounts.length === 0 && userSettings.ayrshare_profiles.length < 1"><span class="input-group-text"><a routerLink="/settings">Connect your socials.</a></span></div>
+          <div class="d-flex form-control justify-content-center" *ngIf="activeSocialAccounts.length === 0 && userSettings.ayrshare_profiles.length >= 1"><span class="input-group-text">Select a profile above to load social networks.</span></div>
+        </div>
+        <!-- /activeSocialAccounts -->
+
+        <!-- Links -->
+        <div class="input-group mb-3" *ngFor="let links of newCampaign.links; let i = index; trackBy:trackByFn">
+          <span class="input-group-text w-25"><i class="fas fa-info-circle" data-bs-toggle="modal" data-bs-target="#InfoModal" (click)="modalInfo('link')"></i>&nbsp;Link</span>
+          <input type="text" class="form-control" placeholder="https://yourwebsite.com/page (optional)" name="link_{{i}}" [(ngModel)]="newCampaign.links[i]" (ngModelChange)="checkLink($event)">
+          <button class="btn btnPrimary text-light" (click)="addLinkField()"><i class="fas fa-plus-square fa-lg"></i></button>
+          <button class="btn btnSecondary text-light" (click)="delLinkField(i)"><i class="fas fa-trash-alt fa-lg"></i></button>
+        </div>
+        <div role="alert" class="alert alert-danger fade show" *ngIf="linkError" [innerHTML]="linkErrorMessage"> <!-- TODO: allow shortlinks was used here. -->
+        </div>
+        </div>
+        <!-- /Links -->
+
+        <!-- /Campaign Tab -->
+
+        <!-- Post Tab -->
+        <div class="mb-3" *ngIf="showPostsTab">
+
+          <!-- Hashtags -->
+
+          <div class="input-group mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-lg"><i class="fas fa-info-circle" data-bs-toggle="modal" data-bs-target="#InfoModal" (click)="modalInfo('hashtagPool')"></i>&nbsp;Hashtags&nbsp;<span *ngIf="newCampaign.hashTagPool.length >= 1">({{ newCampaign.hashTagPool.length }}) &nbsp;</span></span>
+            <mat-form-field class="form-control">
+              <mat-chip-list #tagList aria-label="Campaign Hashtags" class="mat-chip-list">
+                <mat-chip *ngFor="let tag of newCampaign.hashTagPool" [removable]="removable" (removed)="removeChip(tag,'hashtags')" class="mat-chip-list">
+                  {{tag}}
+                  <mat-icon matChipRemove *ngIf="removable" class="mat-chip-list-icon">cancel</mat-icon>
+                </mat-chip>
+                <input
+                      [matChipInputFor]="tagList"
+                      [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                      (matChipInputTokenEnd)="addChip($event,'hashtags')"
+                      (paste)="pasteChips($event,'hashtags')">
+              </mat-chip-list>
+            </mat-form-field>
+            <button class="btn btnSecondary text-light" (click)="removeAllChips(false, 'hashtags')" *ngIf="newCampaign.hashTagPool.length >= 8"><i class="fas fa-minus-circle fa-lg"></i></button>
+            <button class="btn btnPrimary text-light" (click)="removeAllChips(true, 'hashtags')" *ngIf="confirmClearAllTags"><i class="fas fa-check-circle fa-lg"></i></button>
+          </div>
+
+          <div role="alert" class="alert alert-danger fade show m-3" *ngIf="(hashTagError || newCampaign.hashTagPool.length > userSettings.maxHashTagsPerCampaign)">
+            You cannot add more than <strong>{{ userSettings.maxHashTagsPerCampaign }} hashtags</strong> to this campaign. Please consider upgrading to add more.
+          </div>
+
+          <div role="alert" class="alert alert-danger fade show m-3 alert-dismissible" *ngIf="!isHashTagValid">
+            All hashtags must begin with the # symbol, be more than 2 characters, and only include alphanumeric characters. Invalid items pasted into the text area will be ignored. Duplicates will be ignored.
+          </div>
+
+
+          <!-- Auto hash tag -->
+          <div class="input-group mb-3 justify-content-end">
+            <span class="input-group-text" id="basic-addon1"><i class="fas fa-info-circle" data-bs-toggle="modal" data-bs-target="#InfoModal" (click)="modalInfo('hashtag')"></i>&nbsp;Auto-Hashtag</span>
+            <input type="checkbox" class="btn-check btnPrimary" id="autoHashTag" [checked]="!newCampaign.autoHashTag" [disabled]="!userSettings.hasAutoHashTag">
+            <label class="btn" [class]="!userSettings.hasAutoHashTag ? 'btnSecondary' : 'btnPrimary'" for="autoHashTag" (click)="autoHashTagSwitch()">
+              <i class="fas fa-check fa-lg" *ngIf="newCampaign.autoHashTag"></i>
+              <i class="far fa-square fa-lg" *ngIf="!newCampaign.autoHashTag && userSettings.hasAutoHashTag"></i>
+              <i class="fas fa-times fa-lg" *ngIf="!userSettings.hasAutoHashTag"></i>
+            </label>
+          </div>
+
+          <div class="input-group mb-3" *ngFor="let descriptions of newCampaign.postText; let i = index; trackBy: trackByFn">
+            <span class="input-group-text" id="inputGroup-sizing-lg">Post #{{ i + 1 }}</span>
+            <textarea class="form-control text-wrap" placeholder="Posts will use variations of this post text along with combinations of the hashtags from above." [(ngModel)]="newCampaign.postText[i]" name="description_{{i}}"></textarea>
+            <button class="btn btnPrimary text-light" (click)="addDescriptionField(i)"><i class="fas fa-plus-square fa-lg"></i></button>
+            <button class="btn btnSecondary text-light" (click)="delDescriptionField(i)"><i class="fas fa-trash-alt fa-lg"></i></button>
+          </div>
+
+          <div role="alert" class="alert alert-danger fade show" *ngIf="descriptionError">
+            {{ descriptionErrorMessage }}
+          </div>
+
+          <div class="input-group mb-3 justify-content-end">
+            <span class="input-group-text" id="basic-addon1"><i class="fas fa-info-circle" data-bs-toggle="modal" data-bs-target="#InfoModal" (click)="modalInfo('useMorph')"></i>&nbsp;Use Morph</span>
+            <input type="checkbox" class="btn-check" id="useMorph" [checked]="!newCampaign.useMorph" [disabled]="userSettings.subscriptionPlan === 0">
+            <label class="btn" [class]="userSettings.subscriptionPlan === 0 ? 'btnSecondary' : 'btnPrimary'" for="useMorph" (click)="useMorphSwitch()">
+              <i class="fas fa-check fa-lg" *ngIf="newCampaign.useMorph"></i>
+              <i class="far fa-square fa-lg" *ngIf="!newCampaign.useMorph && userSettings.subscriptionPlan >= 1"></i>
+              <i class="fas fa-times fa-lg" *ngIf="userSettings.subscriptionPlan === 0"></i>
+            </label>
+          </div>
+
+          <!-- Description Morph -->
+          <div class="input-group mb-3">
+            <label for="descriptionMorphLevel" class="form-label"><i class="fas fa-info-circle" data-bs-toggle="modal" data-bs-target="#InfoModal" (click)="modalInfo('morph')"></i>&nbsp;Description Morph
+              <span class="badge bg-primary" *ngIf="newCampaign.morphLevel == 1">Minimal Changes</span>
+              <span class="badge bg-success" *ngIf="newCampaign.morphLevel == 2">More Changes</span>
+              <span class="badge bg-warning text-dark" *ngIf="newCampaign.morphLevel == 3"><i class="far fa-gem"></i>&nbsp;Maximum Changes</span>
+            </label>
+            <input type="range" class="form-range" min="1" max="3" step="1" id="descriptionMorphLevel" [value]="newCampaign.morphLevel" [(ngModel)]="newCampaign.morphLevel" name="morphLevel" [disabled]="userSettings.subscriptionPlan === 0">
+          </div>
+
+          <div role="alert" class="alert alert-danger fade show" *ngIf="newCampaign.morphLevel > userSettings.maxMorphLevel">
+            Your maximum post text morph level is: <strong>{{ userSettings.maxMorphLevel }}</strong>.
+            Please consider <strong>upgrading your plan</strong> to unlock more sophisticated changes.
+          </div>
+
+        </div>
+        <!-- /Post Tab -->
+
+        <!-- Media Uploader -->
+        <div class="mb-3 media-clearfix w-100 justify-content-center" *ngIf="showMediaTab">
+
+          <div role="alert" class="alert alert-danger fade show" *ngIf="newCampaign.platforms.length === 0">
+            Please select a social network to post to on the campaign tab.
+          </div>
+
+          <div role="alert" class="alert alert-danger fade show" *ngIf="mediaLoaded === false">
+            You need to upload your media <a routerLink="/media">here</a>.
+          </div>
+
+          <div class="input-group mb-3" *ngIf="newCampaign.platforms.length >= 1">
+            <span class="input-group-text">Post all media to:</span>
+            <div class="d-flex form-control justify-content-center">
+              <div class="col-sm d-flex justify-content-center" *ngFor="let networks of newCampaign.platforms">
+                <input class="btn-check {{networks}}" type="checkbox" id="{{networks}}Master" (change)="masterNetworkSwitch(networks, masterFacebookSwitch)" [checked]="masterFacebookSwitch" #facebookMaster *ngIf="networks == 'facebook'">
+                <label class="btn {{networks}}" for="{{networks}}Master" *ngIf="networks == 'facebook'"><i class="fab fa-{{ networks }} fa-2x"></i></label>
+
+                <input class="btn-check {{networks}}" type="checkbox" id="{{networks}}Master" (change)="masterNetworkSwitch(networks, masterRedditSwitch)" [checked]="masterRedditSwitch" #redditMaster *ngIf="networks == 'reddit'">
+                <label class="btn {{networks}}" for="{{networks}}Master" *ngIf="networks == 'reddit'"><i class="fab fa-{{ networks }} fa-2x"></i></label>
+
+                <input class="btn-check {{networks}}" type="checkbox" id="{{networks}}Master" (change)="masterNetworkSwitch(networks, masterTwitterSwitch)" [checked]="masterTwitterSwitch" #twitterMaster *ngIf="networks == 'twitter'">
+                <label class="btn {{networks}}" for="{{networks}}Master" *ngIf="networks == 'twitter'"><i class="fab fa-{{ networks }} fa-2x"></i></label>
+
+                <input class="btn-check {{networks}}" type="checkbox" id="{{networks}}Master" (change)="masterNetworkSwitch(networks, masterInstagramSwitch)" [checked]="masterInstagramSwitch" #instagramMaster *ngIf="networks == 'instagram'">
+                <label class="btn {{networks}}" for="{{networks}}Master" *ngIf="networks == 'instagram'"><i class="fab fa-{{ networks }} fa-2x"></i></label>
+              </div>
+            </div>
+          </div>
+          <div class="mediaContainer mx-auto" *ngFor="let media of campaignMedia; let i = index">
+
+                <img src="{{ media.thumbnail }}" class="rounded d-block" />
+                <div class="icons bg-dark rounded" *ngIf="newCampaign.platforms.length >= 1">
+                  <i class="fab fa-facebook fa-2x" *ngIf="newCampaign.platforms.includes('facebook')" [ngClass]="media.platforms.includes('facebook') ? 'facebook-active' : ''" (click)="mediaNetworkSwitch('facebook', i)"></i>
+                  <i class="fab fa-reddit fa-2x" *ngIf="newCampaign.platforms.includes('reddit')" [ngClass]="media.platforms.includes('reddit') ? 'reddit-active' : ''" (click)="mediaNetworkSwitch('reddit', i)"></i>
+                  <i class="fab fa-twitter fa-2x" *ngIf="newCampaign.platforms.includes('twitter')" [ngClass]="media.platforms.includes('twitter') ? 'twitter-active' : ''" (click)="mediaNetworkSwitch('twitter', i)"></i>
+                  <i class="fab fa-instagram fa-2x" *ngIf="newCampaign.platforms.includes('instagram')" [ngClass]="media.platforms.includes('instagram') ? 'instagram-active' : ''" (click)="mediaNetworkSwitch('instagram', i)"></i>
+                </div>
+
+          </div>
+
+
+
+        </div>
+
+        <!-- /Media -->
+
+        <!-- Options -->
+        <div class="mb-3" [hidden]="!showOptionsTab">
+
+          <div class="accordion" id="accordionExample">
+            <div class="accordion-item">
+
+              <!-- Scheduling Options -->
+              <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  Schedule & Optimization
+                </button>
+              </h2>
+
+              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+
+
+                <div class="accordion-body">
+
+                  <!-- Start time options -->
+                  <div class="input-group mb-3">
+                    <span class="input-group-text w-50" id="basic-addon1"><strong>Start Time </strong>&nbsp; (Hr / Min)</span>
+                    <select class="form-select w-auto" aria-label="Start Hour" [disabled]="newCampaign.smartSchedule" [(ngModel)]="startHour" name="startHour" (change)="verifySchedule()">
+                      <option [value]="i" *ngFor="let options of counter(24); let i = index" [selected]="userSettings.defaultStartHour === i">{{ ('0' + i).slice(-2) }}</option>
+                    </select>
+                    <select class="form-select w-auto" aria-label="Default select example" [disabled]="newCampaign.smartSchedule" [(ngModel)]="startMinute" name="startMinute" (change)="verifySchedule()">
+                      <option [selected]="userSettings.defaultStartMinute === (i+1)*5" [value]="(i+1)*5" *ngFor="let options of counter(11); let i = index">{{ ('0' + (i+1)*5).slice(-2) }}</option>
+                    </select>
+                  </div>
+
+                  <!-- end time options -->
+                  <div class="input-group mb-3">
+                    <span class="input-group-text w-50" id="basic-addon1"><strong>End Time </strong>&nbsp; (Hr / Min)</span>
+                    <select class="form-select w-auto" aria-label="Default select example" [disabled]="newCampaign.smartSchedule" [(ngModel)]="endHour" name="endHour" (change)="verifySchedule()">
+                      <option [value]="i" *ngFor="let options of counter(24); let i = index" [selected]="endHour === i">{{ ('0' + i).slice(-2) }}</option>
+                    </select>
+                    <select class="form-select w-auto" aria-label="Default select example" [disabled]="newCampaign.smartSchedule" [(ngModel)]="endMinute" name="endMinute" (change)="verifySchedule()">
+                      <option [selected]="endMinute === (i+1)*5" [value]="(i+1)*5" *ngFor="let options of counter(11); let i = index">{{ ('0' + (i+1)*5).slice(-2) }}</option>
+                    </select>
+                  </div>
+
+                  <div class="d-flex justify-content-end">
+                    <div class="input-group mb-3 justify-content-end w-50">
+                      <span class="input-group-text w-auto" id="basic-addon1">Timezone</span>
+                      <select class="form-select w-auto" aria-label="Timezone" [(ngModel)]="newCampaign.timezone" name="timezone">
+                        <option [selected]="newCampaign.timezone">America/Los_Angeles</option>
+                        <option>America/Denver</option>
+                        <option>America/New_York</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Schedule Days -->
+
+                  <div class="mb-3">
+                    <div class="form-check form-check-inline" *ngFor="let day of scheduleDays">
+                      <input class="form-check-input givePointer" type="checkbox" id="scheduleDays_{{day}}" [value]="getWeekdayNum(day.toLowerCase())" [checked]="userSettings.defaultScheduleDays.includes(getWeekdayNum(day.toLowerCase()))" (change)="modDay($event); verifySchedule()">
+                      <label class="form-check-label" for="scheduleDays_{{day}}">{{ day }}</label>
+                    </div>
+                  </div>
+                  <!-- schedule error messages -->
+                  <div role="alert" class="alert alert-danger fade show m-3 alert-dismissible" *ngFor="let message of scheduleErrorMessage">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" (click)="scheduleError = false"></button>
+                  </div>
+
+
+
+                  <!-- Smart Schedule  -->
+
+                    <div class="input-group mb-3 justify-content-end">
+                      <span class="input-group-text" id="basic-addon1"><i class="fas fa-info-circle" data-bs-toggle="modal" data-bs-target="#InfoModal" (click)="modalInfo('optimizer')"></i>&nbsp;Smart Schedule</span>
+                      <input type="checkbox" class="btn-check" id="optimizerButton" autocomplete="off" [checked]="!newCampaign.smartSchedule" [disabled]="!userSettings.hasSmartSchedule">
+                      <label class="btn" [class]="!userSettings.hasSmartSchedule ? 'btnSecondary' : 'btnPrimary'" for="optimizerButton" (click)="optimizerSwitch()">
+                        <i class="fas fa-check fa-lg" *ngIf="newCampaign.smartSchedule"></i>
+                        <i class="far fa-square fa-lg" *ngIf="!newCampaign.smartSchedule && userSettings.hasSmartSchedule"></i>
+                        <i class="fas fa-times fa-lg" *ngIf="!userSettings.hasSmartSchedule"></i>
+                      </label>
+                    </div>
+
+
+                </div>
+              </div>
+            </div>
+
+            <!-- Watermark Settings -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                  Watermark & Media
+                </button>
+              </h2>
+              <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-lg">Text</span>
+                    <input type="text" maxlength="30" class="form-control text-wrap" placeholder="" [value]="userSettings.defaultWatermark" [disabled]="!userSettings.hasCustomWatermark" [(ngModel)]="watermarkTextInput" name="watermarkText" (keyup)="watermarkTextInput = wm.value" #wm>
+                  </div>
+
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-lg">Position</span>
+                    <select class="form-select" aria-label="Default select example" [(ngModel)]="newCampaign.watermarkPos" name="watermarkPos" [disabled]="!userSettings.hasCustomWatermark">
+                      <option *ngFor="let positions of watermarkPositions; let i = index" [value]="positions.value" [selected]="userSettings.defaultWatermarkPosition === positions.value">{{ positions.name }}</option>
+                    </select>
+                  </div>
+
+
+
+                  <div class="input-group mb-3 d-flex justify-content-center" *ngIf="userSettings.subscriptionPlan >= 2">
+                    <div class="row mb-3">
+                      <div class="col text-center">
+                        <p>Background Color</p>
+                        <color-block width="40%" [(ngModel)]="wmBgColor"></color-block>
+                      </div>
+                      <div class="col text-center">
+                        <p>Text Color</p>
+                        <color-block width="40%" [(ngModel)]="wmTextColor"></color-block>
+                      </div>
+                    </div>
+                    <div class="row d-flex justify-content-center">
+                      <div class="col mb-3">
+                        <span class="input-group-text" id="basic-addon1">Text Size</span>
+                        <select class="form-select" [(ngModel)]="wmTextSize">
+                          <option value="20">20</option>
+                          <option value="22">22</option>
+                          <option value="24">24</option>
+                          <option value="26">26</option>
+                          <option value="28">28</option>
+                          <option value="30" selected>30</option>
+                          <option value="32">32</option>
+                          <option value="34">34</option>
+                          <option value="36">36</option>
+                          <option value="38">38</option>
+                          <option value="40">40</option>
+                          <option value="40">42</option>
+                          <option value="40">44</option>
+                          <option value="40">46</option>
+                          <option value="40">48</option>
+                          <option value="40">50</option>
+                          <option value="40">52</option>
+                          <option value="40">54</option>
+                        </select>
+                      </div>
+                      <div class="col mb-3">
+                        <span class="input-group-text" id="basic-addon1">Text Font</span>
+                        <select class="form-select" [(ngModel)]="wmTextFont">
+                          <option value="Arvo">Arvo</option>
+                          <option value="Chivo">Chivo</option>
+                          <option value="exo">exo</option>
+                          <option value="Kanit">Kanit</option>
+                          <option value="PT_Serif">PT_Serif</option>
+                          <option value="Roboto" selected>Roboto</option>
+                        </select>
+                      </div>
+                      <div class="col mb-3">
+                        <span class="input-group-text" id="basic-addon1">Preview</span>
+                        <select class="form-select" [(ngModel)]="wmNetwork">
+                          <option value="Facebook">Facebook</option>
+                          <option value="Twitter">Twitter</option>
+                          <option value="Instagram" selected>Instagram</option>
+                          <option value="Reddit">Reddit</option>
+                          <option value="Telegram">Telegram</option>
+                        </select>
+                      </div>
+                      <div class="col mb-3">
+                        <span class="input-group-text" id="basic-addon1">Opacity</span>
+                        <select class="form-select" [(ngModel)]="wmOpacity">
+                          <option [value]="(i+1)*5" *ngFor="let opacity of counter(20); let i = index" [selected]="(i+1)*5 === 85">{{ (i+1)*5 }}%</option>
+                        </select>
+                      </div>
+                      <div class="col mb-3">
+                        <button type="button" class="btn btnPrimary" (click)="loadPreview()"><i class="far fa-eye"></i></button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="alert alert-dark" role="alert" *ngIf="wmSample">
+                    <a [href]="wmSample" target="_blank"><img [src]="wmSample" class="rounded" /></a>
+                  </div>
+
+
+                  <div role="alert" class="alert alert-info fade show m-3" *ngIf="!userSettings.hasCustomWatermark">
+                    This text will be applied to all images posted. If you would like to have custom watermarks applied to your images,
+                    please consider upgrading.
+                  </div>
+
+                  <!-- Unique Distribution -->
+                  <!-- <div class="input-group mb-3 justify-content-end">
+                    <span class="input-group-text" id="basic-addon1"><i class="fas fa-info-circle" data-bs-toggle="modal" data-bs-target="#InfoModal" (click)="modalInfo('unique')"></i>&nbsp;Unique Distribution</span>
+                    <input type="checkbox" class="btn-check" id="uniqueDistro" autocomplete="off" [checked]="!newCampaign.uniqueDistro" [disabled]="!userSettings.hasUniqueDistribution">
+                    <label class="btn" [class]="!userSettings.hasUniqueDistribution ? 'btnSecondary' : 'btnPrimary'" for="uniqueDistro" (click)="distroSwitch()">
+                      <i class="fas fa-check fa-lg" *ngIf="newCampaign.uniqueDistro"></i>
+                      <i class="far fa-square fa-lg" *ngIf="!newCampaign.uniqueDistro&& userSettings.hasUniqueDistribution"></i>
+                      <i class="fas fa-times fa-lg" *ngIf="!userSettings.hasUniqueDistribution"></i>
+                    </label>
+                  </div> -->
+
+
+
+
+
+
+
+                </div>
+              </div>
+            </div>
+
+            <!-- Advanced Settings -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingThree">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                  Advanced
+                </button>
+              </h2>
+              <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+
+                <div class="accordion-body" >
+
+                  <div role="alert" class="alert alert-info fade show" [hidden]="userSettings.hasAdvancedOptions">
+                    To access all advanced options, please consider upgrading.
+                  </div>
+
+                  <!-- Auto Repost Option -->
+                  <div class="input-group mb-3" [hidden]="!userSettings.hasAdvancedOptions">
+                    <span class="input-group-text w-25"><i class="fas fa-info-circle" data-bs-toggle="modal" data-bs-target="#InfoModal" (click)="modalInfo('autoRepost')"></i>&nbsp;Auto Repost</span>
+                    <input type="checkbox" class="btn-check" id="autoRepost" autocomplete="off" [checked]="!newCampaign.autoRepost" [disabled]="!userSettings.hasAutoRepost">
+                    <label class="btn" [class]="!userSettings.hasAutoRepost ? 'btnSecondary' : 'btnPrimary'" for="autoRepost" (click)="autoRepostSwitch()">
+                      <i class="fas fa-check fa-lg" *ngIf="newCampaign.autoRepost"></i>
+                      <i class="far fa-square fa-lg" *ngIf="!newCampaign.autoRepost && userSettings.hasAutoRepost"></i>
+                      <i class="fas fa-times fa-lg" *ngIf="!userSettings.hasAutoRepost"></i>
+                    </label>
+                    <span class="input-group-text w-auto">Repost</span>
+                    <select class="form-select w-auto" [(ngModel)]="newCampaign.repostRepeat" name="autoRepostRepeat" [disabled]="!userSettings.hasAutoRepost || !newCampaign.autoRepost ">
+                      <option *ngFor="let times of ['1','2','3','4','5','6','7','8','9','10']; let i = index" [value]="times">{{ times }} Times</option>
+                    </select>
+                    <span class="input-group-text w-auto">Wait for</span>
+                    <select class="form-select w-auto" [(ngModel)]="newCampaign.repostDays" name="autoRepostDays" [disabled]="!userSettings.hasAutoRepost || !newCampaign.autoRepost">
+                      <option *ngFor="let days of ['3','4','5','6','7','8','9','10'];; let i = index" [value]="days">{{days}} Days</option>
+                    </select>
+                  </div>
+
+                  <!-- Instagram Options -->
+                  <div class="input-group mb-3" [hidden]="!userSettings.hasAdvancedOptions">
+                    <span class="input-group-text w-25">
+                      <i class="fab fa-instagram fa-lg" data-bs-toggle="modal" data-bs-target="#InfoModal" (click)="modalInfo('igUsers')"></i>&nbsp;Tag Users&nbsp;
+
+                      <span *ngIf="newCampaign.igUsers.length >= 1">({{ newCampaign.igUsers.length }}) &nbsp;</span></span>
+                    <mat-form-field class="form-control" [ngClass]="!newCampaign.platforms.includes('instagram') ? 'disabledForm' : ''">
+                      <mat-chip-list #userList aria-label="Instagram Users" class="mat-chip-list">
+                        <mat-chip *ngFor="let users of newCampaign.igUsers" [removable]="removable" (removed)="removeChip(users,'users')" class="mat-chip-list">
+                          @{{users}}
+                          <mat-icon matChipRemove *ngIf="removable" class="mat-chip-list-icon">cancel</mat-icon>
+                        </mat-chip>
+                        <mat-chip *ngIf="!newCampaign.platforms.includes('instagram')">You must enable Instagram.</mat-chip>
+                        <input
+                              [disabled]="!newCampaign.platforms.includes('instagram')"
+                              [matChipInputFor]="userList"
+                              [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                              (matChipInputTokenEnd)="addChip($event,'users')"
+                              (paste)="pasteChips($event,'users')">
+                      </mat-chip-list>
+                    </mat-form-field>
+                    <button class="btn btnSecondary text-light" (click)="removeAllChips(false, 'users')" *ngIf="newCampaign.igUsers.length >= 8"><i class="fas fa-minus-circle fa-lg"></i></button>
+                    <button class="btn btnPrimary text-light" (click)="removeAllChips(true, 'users')" *ngIf="confirmClearAllUsers"><i class="fas fa-check-circle fa-lg"></i></button>
+                  </div>
+
+                  <div role="alert" class="alert alert-danger fade show" *ngIf="!isUsernameValid">
+                    Username must include @ symbol, be no less than 3 characters, and contain no duplicates.
+                    <span *ngIf="newCampaign.igUsers.length >= userSettings.maxIgUsers"> You cannot add more than <strong>{{ userSettings.maxIgUsers }}</strong> users per campaign. Pleae upgrade to add more users.</span>
+                  </div>
+
+
+                  <!-- Instagram location options -->
+                  <div class="input-group mb-3" [hidden]="!userSettings.hasAdvancedOptions">
+                    <span class="input-group-text w-25">
+                      <i class="fab fa-instagram fa-lg" data-bs-toggle="modal"
+                      data-bs-target="#InfoModal" (click)="modalInfo('igLocation')"></i>&nbsp;Tag Location</span>
+                      <input type="text" class="form-control" id="IgLocation" name="IgLocation" #igLocation [ngModel]="newCampaign.igLocation" (keyup)="newCampaign.igLocation[0] = igLocation.value" [disabled]="!newCampaign.platforms.includes('instagram')">
+                  </div>
+
+                  <!-- Reddit Options -->
+                  <div class="input-group mb-3">
+                    <span class="input-group-text w-25">
+                      <i class="fab fa-reddit fa-lg" data-bs-toggle="modal" data-bs-target="#InfoModal" (click)="modalInfo('redditOptions')"></i>&nbsp;Subreddits</span>
+                      <mat-form-field class="form-control" [ngClass]="!newCampaign.platforms.includes('reddit') ? 'disabledForm' : ''">
+                        <mat-chip-list #subreddits aria-label="Subreddits" class="mat-chip-list">
+                          <mat-chip *ngFor="let subreddit of newCampaign.subreddits" [removable]="removable" (removed)="removeChip(subreddit,'subreddit')" class="mat-chip-list" [disabled]="!newCampaign.platforms.includes('reddit')">
+                            {{subreddit}}
+                            <mat-icon matChipRemove *ngIf="removable" class="mat-chip-list-icon">cancel</mat-icon>
+                          </mat-chip>
+                          <mat-chip *ngIf="!newCampaign.platforms.includes('reddit')">You must enable Reddit.</mat-chip>
+                          <input
+                                [disabled]="!newCampaign.platforms.includes('reddit')"
+                                [matChipInputFor]="subreddits"
+                                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                                (matChipInputTokenEnd)="addChip($event,'subreddit')"
+                                (paste)="pasteChips($event, 'subreddit')">
+                        </mat-chip-list>
+                      </mat-form-field>
+                  </div>
+
+                  <div role="alert" class="alert alert-danger fade show" *ngIf="newCampaign.subreddits.length < 1 && newCampaign.platforms.includes('reddit')">
+                    When posting to reddit, you must set at least one subreddit to post to.
+                  </div>
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- /Options tab -->
+
+        <!-- <div class="mb-3 alert alert-info alert-dismissible" *ngIf="!showOptionsTab && !showPostsTab" role="alert">
+          After you create your campaign, your posts will be scheduled automatically.
+          You can view these posts in the campaign manager <a routerLink="/manager">here</a>.
+          There, you can edit posts individually to better suit your needs.
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div> -->
+
+
+
+      </form>
+    </div>
+    <!-- <div class="row justify-content-center">
+      <div role="alert" class="col-sm alert alert-info fade show m-3" *ngIf="estimatedPosts > 0 && newCampaign.platforms.length >= 1">
+        Your campaign will post approximately <strong>{{ estimatedPosts }} posts</strong> across {{ newCampaign.platforms.length }} social networks.
+      </div>
+    </div> -->
+
+    <!-- <ngx-spinner name="create"><p>Creating campaign. Please wait...</p></ngx-spinner> -->
+
+    <!-- <div class="row m-3" *ngIf="!showMediaTab">
+      {{ newCampaign | json }} -- {{ errorMessage }}
+    </div> -->
+  </div>
+
+  <div class="row" *ngIf="addNew">
+    <div class="col d-flex justify-content-center text-align-center align-text-center">
+      <button class="btn btnPrimary" (click)="estimateTotalPosts()"><i class="fas fa-atom fa-2x"></i></button>&nbsp;
+      <button class="btn btnPrimary" (click)="hideAllBut('posts')" *ngIf="showCampaignTab"><h5>Next</h5></button>
+      <button class="btn btnPrimary" (click)="getMedia(); hideAllBut('media')" *ngIf="showPostsTab"><h5>Next</h5></button>
+      <button class="btn btnPrimary" (click)="hideAllBut('options')" *ngIf="showMediaTab"><h5>Next</h5></button>
+      <button class="btn btnPrimary" type="submit" (click)="verifyCampaign(newCampaign)" *ngIf="showOptionsTab"><h5>Create Campaign</h5></button>
+      <!-- <button class="btn btnPrimary" (click)="printJson()" ><h5>check campaign json</h5></button>
+      <button class="btn btnPrimary" (click)="returnEndDate(startDatePicker, newCampaign.scheduleDays, newCampaign.postsPerDay)">check enddate</button>
+    <button class="btn btnPrimary" (click)="checkUsers()">check users</button> -->
+    </div>
+  </div>
+
+  <!-- Generic Modal to be used for all info button clicks -->
+  <div class="modal fade" id="InfoModal" tabindex="-1" aria-labelledby="InfoModal" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">{{ modalTitle }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="clearVerify()" *ngIf="modalAlert !== 'maxCampaigns'"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="goBack()" *ngIf="modalAlert === 'maxCampaigns'"></button>
+        </div>
+        <div class="modal-body" [innerHTML]="modalMessage" *ngIf="modalMessage.length > 1">
+        </div>
+
+          <!-- Alerts -->
+          <div role="alert" class="alert alert-danger fade show m-3" *ngIf="(!userSettings.hasSmartSchedule && modalAlert === 'optimizer')">
+            You current plan does not have smart schedule included. Please consider upgrading to the <strong>influencer</strong> plan use this feature.
+          </div>
+
+          <div role="alert" class="alert alert-info fade show m-3" *ngIf="(userSettings.maxMorphLevel == 1 && modalAlert === 'morph')">
+            You current plan only allows basic description morph, which is <strong>enabled by default</strong>.
+          </div>
+
+          <div role="alert" class="alert alert-danger fade show m-3" *ngIf="(!userSettings.hasAutoHashTag && modalAlert === 'hashtag')">
+            You current plan does not have the auto-hashtag feature. Please consider upgrading to use this feature.
+            Your posts will have hashtags selected at random from the hashtags you added.
+          </div>
+
+          <div role="alert" class="alert alert-info fade show m-3" *ngIf="modalAlert === 'socialNetworks'">
+            You currently can post to a <strong>maximum of {{ userSettings.maxSocialNetworks }} per campaign</strong>. Please consider upgrading to post to more social networks.
+          </div>
+
+          <div role="alert" class="alert alert-info fade show m-3" *ngIf="modalAlert === 'unique' && !userSettings.hasUniqueDistribution">
+            Please upgrade to the <strong>pro</strong> plan or above to utilize this feature.
+          </div>
+
+          <div role="alert" class="alert alert-info fade show m-3" *ngIf="modalAlert === 'hashtagPool' && userSettings.maxHashTagsPerCampaign < 75">
+            You have a maximum of {{ userSettings.maxHashTagsPerCampaign }} #hashtags per campaign.
+            Consider upgrading to the <strong>pro plan</strong> and get a maximum of 75.
+            Easily copy and paste your hashtags into the box.
+          </div>
+
+          <div role="alert" class="alert alert-info fade show m-3" *ngIf="modalAlert === 'maxCampaigns'">
+            You have reached the maximum amount of campaigns for your account type.
+            Please upgrade to increase your limits and add a ton of cool features!
+          </div>
+
+          <!-- Body for verifycampaign() function -->
+          <div class="modal-body" *ngIf="modalAlert === 'verifyCampaign'">
+            <ul>
+              <li>
+                Creating campaign ...
+              </li>
+              <li *ngIf="verNetworks.error" class="text-danger">
+                {{ verNetworks.message }}
+              </li>
+              <li *ngIf="verMedia.message == 'OK'">
+                Verifying media ... {{ verMedia.message }}
+              </li>
+              <li *ngIf="verMedia.error" class="text-danger">
+                {{ verMedia.message }}
+              </li>
+              <li *ngIf="verSchedule.error" class="text-danger">
+                {{ verSchedule.message }}
+              </li>
+              <li *ngIf="!verSchedule.error && verSchedule.message">
+                {{ verSchedule.message }}
+              </li>
+              <li *ngIf="verMeta.error" class="text-danger">
+                {{ verMeta.message }} <span *ngFor="let errors of verMeta.data">{{errors}} </span>.
+              </li>
+            </ul>
+          </div>
+
+          <div role="alert" class="alert alert-danger fade show m-3" *ngIf="verCampaign.error">
+            {{ verCampaign.message }}
+          </div>
+
+          <div role="alert" class="alert alert-success fade show m-3" *ngIf="!verCampaign.error && verCampaign.message">
+            {{ verCampaign.message }}
+          </div>
+
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="clearVerify()" *ngIf="modalAlert === 'verifyCampaign'">Close</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="goBack()" *ngIf="modalAlert === 'maxCampaigns'">Close</button>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- <div class="row">
+
+          {{ campaignMedia | json }}
+</div> -->
+
+<div class="spacer"></div>
+
+<div hidden>
+  <i class="fas fa-info-circle" data-bs-toggle="modal" data-bs-target="#InfoModal" (click)="modalInfo('maxCampaigns')" #InfoModal></i>
+</div>
+
+<div hidden>
+  <i class="fas fa-info-circle" data-bs-toggle="modal" data-bs-target="#InfoModal" (click)="modalInfo('verifyCampaign')" #verifyCampaignModal></i>
+</div>

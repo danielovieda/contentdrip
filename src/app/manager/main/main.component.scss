@@ -1,0 +1,132 @@
+@import url('../../shared/homepage/homepage.component.css');
+
+div div div span {
+  font-size: 10pt;
+}
+
+// .mediaContainer img {
+//   max-width: 120px;
+//   max-height: 120px;
+//   width: 120px;
+//   height: 120px;
+//   object-fit: cover;
+//   text-align: center;
+// }
+
+.mediaContainer {
+  position: relative;
+  //float: left;
+  display: block;
+  text-align: center;
+  max-width: 220px;
+  max-height: 220px;
+}
+
+.mediaContainer img {
+  max-width: 220px;
+  max-height: 220px;
+  width: 242px;
+  height: 242px;
+  object-fit: cover;
+  padding: 2px;
+  text-align: center;
+}
+
+.mediaContainer .icons {
+  max-width: 80%;
+  position: absolute;
+  right: -5px;
+  bottom: 5px;
+  //top: 0px;
+  color: #4d4d4d;
+  padding: 5px;
+  vertical-align: middle;
+  opacity: 0.85;
+  //align-self: flex-end;
+  font-size: small;
+}
+
+.mediaContainer .icons span {
+  color: white;
+  font-size: small;
+  margin-right: 5px;
+}
+
+.mediaContainer .icons i {
+  margin-left: 5px;
+}
+
+.mediaContainer .icons i:first-of-type {
+  margin-left: 0px;
+}
+
+.deletePost:hover {
+  color: var(--secondary);
+}
+
+.mediaContainer .postText {
+  max-width: 100%;
+  max-height: 95%;
+  position: absolute;
+  left: 25px;
+  //bottom: 5px;
+  top: 5px;
+  color: white;
+  background-color: #4d4d4d;
+  padding: 5px;
+  vertical-align: middle;
+  opacity: 0.85;
+  font-size: small;
+  //align-self: flex-end;
+  cursor: pointer;
+  text-align: left;
+  margin: 0px;
+}
+
+a:active {
+  color: var(--primary);
+}
+
+
+.mediaContainer .postClose {
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  right: -5px;
+  //bottom: 5px;
+  top: 5px;
+  color: #4d4d4d;
+  padding: 5px;
+  vertical-align: middle;
+  opacity: 0.85;
+  //align-self: flex-end;
+}
+
+.scrollbar
+{
+	margin-left: 30px;
+	float: left;
+	background: #343a40;
+	overflow-y: scroll;
+	margin-bottom: 25px;
+}
+
+#style-2::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #343a40;
+}
+
+#style-2::-webkit-scrollbar
+{
+	width: 12px;
+	background-color: #343a40;
+}
+
+#style-2::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: var(--primary);
+}

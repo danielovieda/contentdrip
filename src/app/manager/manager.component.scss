@@ -1,0 +1,300 @@
+@import url('../shared/homepage/homepage.component.css');
+
+.description {
+  width: 100px;
+  min-height: 40px;
+}
+
+.nav-link {
+  color: #000;
+}
+
+.nav-item .active {
+  color: var(--primary);
+  font-weight: bold;
+}
+
+.callout {
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid #eee;
+  border-left-width: 5px;
+  border-radius: 3px;
+  h4 {
+    margin-top: 0;
+    margin-bottom: 5px;
+  }
+  p:last-child {
+    margin-bottom: 0;
+  }
+  code {
+    border-radius: 3px;
+  }
+  & + .bs-callout {
+    margin-top: -5px;
+  }
+}
+@each $name,$color in (default,#777),(primary,#428bca),(success,#5cb85c),(danger,#d9534f),(warning,#f0ad4e),(info,#5bc0de), (bdc,#29527a) {
+  .callout-#{$name} {
+    border-left-color: $color;
+    h4 {
+      color: $color;
+    }
+  }
+}
+
+.nav-item {
+  cursor: pointer;
+}
+
+i {
+  cursor: pointer;
+}
+
+.givePointer {
+  cursor: pointer;
+}
+
+.noboder {
+  border: 0;
+}
+
+::ng-deep .mat-form-field-underline {
+  display: none;
+}
+
+.mat-chip-list
+ {
+   vertical-align: middle;
+   margin-top: auto;
+   margin-bottom: auto;
+ }
+
+ .mat-chip-list-icon
+ {
+   position: relative;
+   top: -2px;
+ }
+
+ .campaignTitle {
+   font-weight: bold;
+ }
+
+ .facebook {
+   color: #e9ecef;
+ }
+
+ .facebook:hover {
+   background-color: white;
+   color: #3b5998;;
+ }
+
+input:checked ~ .facebook {
+   background-color: white;
+   color: #3b5998;
+ }
+
+.instagram {
+  color: #e9ecef;
+}
+
+.instagram:hover {
+  background: #d6249f;
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%,#d6249f 60%,#285AEB 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+input:checked ~ .instagram {
+  background: #d6249f;
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%,#d6249f 60%,#285AEB 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.reddit {
+  color: #e9ecef;
+}
+
+.reddit:hover {
+  color: #FF4500;
+}
+
+input:checked ~ .reddit {
+  background-color: white;
+  color: #FF4500;
+}
+
+.twitter {
+  color: #e9ecef;
+}
+
+.twitter:hover {
+  color: #1DA1F2;
+}
+
+input:checked ~ .twitter {
+  background-color: white;
+  color: #1DA1F2;
+}
+
+.container-sm {
+  max-width: 768px;
+}
+
+.col-sm {
+  max-width: 768px;
+}
+
+.mediaContainer {
+  position: relative;
+  float: left;
+  display: block;
+  text-align: center;
+}
+
+.mediaContainer img {
+  max-width: 220px;
+  max-height: 220px;
+  width: 242px;
+  height: 242px;
+  object-fit: cover;
+  padding: 2px;
+  text-align: center;
+}
+
+.mediaContainer .icons {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  color: #4d4d4d;
+  padding: 5px;
+  vertical-align:middle;
+  opacity: 0.85;
+}
+
+.mediaContainer .icons i {
+  margin-left: 5px;
+}
+
+.mediaContainer .icons i:first-of-type {
+  margin-left: 0px;
+}
+
+.facebook-active {
+  color: #3b5998;;
+}
+
+.reddit-active {
+  color: #FF4500;
+}
+
+.instagram-active {
+  background: #d6249f;
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%,#d6249f 60%,#285AEB 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.twitter-active {
+  color: #1DA1F2;
+}
+
+.media-clearfix {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.disabledForm {
+  background-color: #e9ecef;
+}
+
+@media only screen and (max-width: 500px) {
+  .mediaContainer img {
+    max-width: 220px;
+    max-height: 220px;
+    width: 220px;
+    height: 220px;
+  }
+}
+
+::ng-deep .matTooltip {
+  position: relative;
+  display: inline;
+  z-index: 99;
+  top: -150px;
+  left: 150px;
+  opacity: 0.90;
+}
+
+.campaignHeight {
+  min-height: 500px;
+}
+
+.spacer {
+  height: 100px;
+}
+
+.accordion-button {
+  color: black !important;
+
+}
+
+.accordion-button:not(.collapsed) {
+  background-color: var(--primary) !important;
+  color: white !important;
+  box-shadow: 0 0 0 0.25rem #DCF7F9;
+}
+
+.accordion-button:not(.collapsed)::after {
+  background-image: url('../../assets/default_avatar_1.png');
+  transform: rotate(-0deg) !important;
+}
+
+.accordion-button::after {
+  width: 3rem;
+  height: 3rem;
+  background-size: 3rem;
+  background-image: url('../../assets/default_avatar_2.png');
+}
+
+ .form-check-input:checked {
+  background-color: var(--primary) !important;
+  border-color: var(--primaryHover) !important;
+}
+
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.25rem #DCF7F9 !important;
+}
+
+.accordion-button:focus {
+  box-shadow: 0 0 0 0.25rem #DCF7F9 !important;
+}
+
+.form-select:focus {
+  box-shadow: 0 0 0 0.25rem #DCF7F9 !important;
+}
+
+.form-control:focus {
+  box-shadow: 0 0 0 0.25rem #DCF7F9 !important;
+}
+
+
+// @media only screen and (max-width: 500px) {
+//   .mediaContainer img {
+//     max-width: 220px;
+//     max-height: 220px;
+//     width: 220px;
+//     height: 220px;
+//   }
+// }
+
+.form-range::-webkit-slider-thumb {
+  background-image: url('../../assets/default_avatar_2.png') !important;
+  background-color: var(--primary);
+}
+
+.form-range {
+  background-image: url('../../assets/default_avatar_2.png') !important;
+}

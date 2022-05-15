@@ -1,0 +1,180 @@
+
+<section>
+  <div class="bannerSection">
+    <div class="blurBg bannerBlurBg"></div>
+    <div class="container position-relative">
+      <div class="row align-items-center">
+        <div class="col-lg order-lg-last">
+          <div class="bannerImgCol">
+            <img src="assets/images/banner-img.jpg" alt="...">
+          </div>
+        </div>
+        <div class="col-lg-auto">
+          <div class="bannerContent">
+            <h5>Content Drip</h5>
+            <h2 class="xlTitle darkColor pb-2">Post like an Influencer</h2>
+            <p>The fastest, easiest way to post your content so you can focus on creating.</p>
+            <ng-container *ngIf="userService.auth.isAuthenticated$ | async; else loggedOutNav">
+            <a routerLink="/media" class="btn btnPrimary minWdBtnLg mt-2 mt-lg-4"><span>Upload your Media</span></a>
+          </ng-container>
+
+          </div>
+        </div>
+      </div>
+      <div class="blurBg secondary bannerBtmShape"></div>
+    </div>
+  </div>
+</section>
+<section>
+  <div class="whiteShapeBg sectionSpace">
+    <div class="container position-relative">
+      <div class="socialCol pb-3">
+        <div class="row g-3 align-items-center justify-content-center">
+          <div class="col-auto col-md"><img src="assets/images/fb-logo.png" alt="Post to Facebook"></div>
+          <div class="col-auto col-md"><img src="assets/images/twitter-logo.png" alt="Post to Twitter"></div>
+          <div class="col-auto col-md"><img src="assets/images/insta-logo.png" alt="Post to Instagram"></div>
+          <div class="col-auto col-md"><img src="assets/images/telegram-logo.png" alt="Post to Telegram"></div>
+          <div class="col-auto col-md"><img src="assets/images/reddit-logo.png" alt="Post to Reddit"></div>
+        </div>
+      </div>
+      <hr>
+      <div class="pt-4">
+        <div class="row g-4 align-items-center">
+          <div class="col-lg-6">
+            <div class="bpsImgCol">
+              <img src="assets/images/img-1.svg" alt="...">
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="contentCol text-center text-lg-start">
+              <h4 class="lgTitle pb-3">Bulk Post Scheduling</h4>
+              <p>Schedule hundreds of posts to Twitter, Facebook, Instagram, and more in minutes. Upload your media, add descriptions, hashtags, links, and set up your posting schedule. Once your campaign is created, posts will automatically be generated and scheduled to post. Review, edit, and delete any posts in from the campaign manager.</p>
+              <ng-container *ngIf="userService.auth.isAuthenticated$ | async; else howItWorks">
+                <a routerLink="/campaigns" class="btn btnPrimary minWdBtnLg mt-2 mt-lg-4"><span>Create a Campaign</span></a>
+              </ng-container>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="blurBg blurYellow bpsBlurBg"></div>
+    </div>
+  </div>
+</section>
+<section>
+  <div class="sectionSpace">
+    <div class="container smartScheduling blurBg blurGreen smartSchedulingLeftShape">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-6 order-lg-last">
+          <div class="imgsStyleCol ms-lg-auto">
+            <div class="row g-3 align-items-end">
+              <div class="col-auto">
+                <div class="img1"><img src="assets/images/drop-circle-img.svg" alt="..."></div>
+              </div>
+              <div class="col col-sm-auto">
+                <div class="img2"><img src="assets/images/ss-img-2.jpg" alt="..."></div>
+              </div>
+              <div class="col-6 col-sm">
+                <div class="img3"><img src="assets/images/ss-img-3.jpg" alt="..."></div>
+              </div>
+              <div class="col-12">
+                <div class="img4">
+                  <img src="assets/images/ss-img-4.jpg" alt="...">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="contentCol text-center text-lg-start">
+            <span class="likeImg text-center d-block"><img src="assets/images/like-img.png" alt="..."></span>
+            <h4 class="lgTitle pb-3">Smart <br> Scheduling</h4>
+            <p>Everyone's audience is somewhat different. We track your link engagement analytics and learn when your followers are most likely to interact with your posts. These times are then used for scheduling your posts to reach your audience when they are active online and viewing content. <span class="fwBold">The smart way to schedule your posts!</span></p>
+            <ng-container *ngIf="userService.auth.isAuthenticated$ | async; else loggedOutNav">
+              <a routerLink="/settings" class="btn btnPrimary minWdBtnLg mt-2 mt-lg-4"><span>Connect your Socials</span></a>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section>
+  <div class="sectionSpace text-center">
+    <div class="container blurBg ivBlurBg">
+      <h4 class="lgTitle">Image and Video <br> Optimization</h4>
+      <div class="ivoImgCol">
+        <img src="assets/images/ivo-img.png" alt="...">
+      </div>
+      <div class="contentCol ivoContentCol">
+        <p>Upload your images and video* to our platform and <span class="fwBold">we will automatically optimize your media to meet the requirements of the platforms you post to.</span> Let us worry about whether or not your media is the right dimensions or ratio. Smart cropping ensures that the best parts of your images will be seen.</p>
+        <ng-container *ngIf="userService.auth.isAuthenticated$ | async; else loggedOutNav">
+          <a routerLink="/media" class="btn btnPrimary minWdBtnLg mt-2 mt-lg-4"><span>Upload your Media</span></a>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</section>
+<section>
+  <div class="sectionSpace">
+    <div class="container smartScheduling blurBg daiCenterShape">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-6">
+          <div class="imgsStyleCol">
+            <div class="row g-3 align-items-end">
+              <div class="col-auto">
+                <div class="img1"><img src="assets/images/drop-circle-img.svg" alt="..."></div>
+              </div>
+              <div class="col-auto">
+                <div class="img2"><img src="assets/images/dai-img-2.jpg" alt="..."></div>
+              </div>
+              <div class="col">
+                <div class="img3"><img src="assets/images/dai-img-3.jpg" alt="..."></div>
+              </div>
+              <div class="col-12">
+                <div class="img4">
+                  <img src="assets/images/dai-img-4.jpg" alt="...">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="contentCol text-center text-lg-start">
+            <h4 class="lgTitle pb-3">Descriptions <br> with AI</h4>
+            <p>Every description that you add to a campaign is re-written by an AI to ensure that each post is unique. Unique descriptions, in addition to multiple hashtags and your link means that your posts will never be duplicates or marked as spam by your social networks. Several safeguards are in place to ensure the integrity of your accounts.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section>
+  <div class="whiteShapeBg growBrandSection">
+    <div class="container">
+      <div class="growBrandContent contentCol">
+        <h4 class="lgTitle pb-3">Grow your Brand</h4>
+        <p>Consistently posting content to your social networks helps you grow. With just a few clicks, you'll be able to hundreds of posts to keep content freshly updated on your social networks. Content Drip is the only service that makes it this easy!</p>
+
+        <ng-container *ngIf="userService.auth.isAuthenticated$ | async; else loggedOutNav2">
+          <a routerLink="/settings" class="btn btnSecondary minWdBtnLg mt-2 mt-lg-4"><span>Connect your Social Networks</span></a>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<ng-template #howItWorks>
+  <a routerLink="howitworks" class="btn btnPrimary minWdBtnLg mt-2 mt-lg-4"><span>Watch the Video →</span></a>
+</ng-template>
+
+
+
+<ng-template #loggedOutNav>
+  <a (click)="userService.loginWithRedirect()" class="btn btnPrimary minWdBtnLg mt-2 mt-lg-4"><span>Get 30 Days Free →</span></a>
+</ng-template>
+
+<ng-template #loggedOutNav2>
+  <a (click)="userService.loginWithRedirect()" class="btn btnSecondary minWdBtnLg mt-2 mt-lg-4"><span>Increase Brand Awareness →</span></a>
+</ng-template>
